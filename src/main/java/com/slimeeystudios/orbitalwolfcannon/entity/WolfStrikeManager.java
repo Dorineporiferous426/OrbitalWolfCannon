@@ -1,6 +1,7 @@
 package com.slimeeystudios.orbitalwolfcannon.entity;
 
 import com.slimeeystudios.orbitalwolfcannon.OrbitalWolfCannonMod;
+import com.slimeeystudios.orbitalwolfcannon.config.OrbitalWolfCannonConfig;
 import com.slimeeystudios.orbitalwolfcannon.util.CirclePositionUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.EquipmentSlot;
@@ -29,14 +30,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class WolfStrikeManager {
-    private static final int WOLF_COUNT = 48;
-    private static final double RADIUS = 6.0D;
-    private static final int STRENGTH_DURATION_TICKS = 6_000;
-    private static final int STRENGTH_AMPLIFIER = 1;
-
-    // Summoned wolves despawn after 5 minutes.
-    private static final boolean AUTO_DESPAWN_ENABLED = true;
-    private static final long AUTO_DESPAWN_TICKS = 20L * 60L * 5L;
 
     private static final Map<UUID, Long> TRACKED_WOLVES = new HashMap<>();
 
@@ -58,15 +51,15 @@ public final class WolfStrikeManager {
                 player.getZ(),
                 SoundEvents.ENTITY_ENDER_DRAGON_GROWL,
                 SoundCategory.PLAYERS,
-                1.8F,
-                0.85F
+                OrbitalWolfCannonConfig.summonSoundVolume,
+                OrbitalWolfCannonConfig.summonSoundPitch
         );
 
         List<double[]> positions = CirclePositionUtil.evenlyDistributedXZ(
                 player.getX(),
                 player.getZ(),
-                RADIUS,
-                WOLF_COUNT
+                OrbitalWolfCannonConfig.circleRadius,
+                OrbitalWolfCannonConfig.wolfCount
         );
 
         for (double[] position : positions) {
@@ -86,7 +79,7 @@ public final class WolfStrikeManager {
         wolf.setTamed(true, true);
         wolf.setSitting(false);
         wolf.equipStack(EquipmentSlot.BODY, new ItemStack(Items.WOLF_ARMOR));
-        wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, STRENGTH_DURATION_TICKS, STRENGTH_AMPLIFIER));
+        wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, OrbitalWolfCannonConfig.strengthDurationTicks, OrbitalWolfCannonConfig.strengthAmplifier));
 
         world.spawnEntity(wolf);
         retargetToNearbyHostile(wolf);
@@ -94,13 +87,13 @@ public final class WolfStrikeManager {
         world.spawnParticles(ParticleTypes.EXPLOSION, x, y + 0.2D, z, 2, 0.15D, 0.05D, 0.15D, 0.01D);
         world.spawnParticles(ParticleTypes.CLOUD, x, y + 0.1D, z, 5, 0.2D, 0.06D, 0.2D, 0.01D);
 
-        if (AUTO_DESPAWN_ENABLED) {
-            TRACKED_WOLVES.put(wolf.getUuid(), world.getTime() + AUTO_DESPAWN_TICKS);
+        if (OrbitalWolfCannonConfig.autoDespawnEnabled) {
+            TRACKED_WOLVES.put(wolf.getUuid(), world.getTime() + OrbitalWolfCannonConfig.wolfDespawnTicks);
         }
     }
 
     private static void spawnActivationRing(ServerWorld world, ServerPlayerEntity player) {
-        List<double[]> ring = CirclePositionUtil.evenlyDistributedXZ(player.getX(), player.getZ(), RADIUS, 72);
+        List<double[]> ring = CirclePositionUtil.evenlyDistributedXZ(player.getX(), player.getZ(), OrbitalWolfCannonConfig.circleRadius, 72);
         double y = player.getY() + 0.05D;
 
         for (double[] position : ring) {
@@ -139,7 +132,7 @@ public final class WolfStrikeManager {
                 continue;
             }
 
-            if (AUTO_DESPAWN_ENABLED && worldTime >= entry.getValue()) {
+            if (OrbitalWolfCannonConfig.autoDespawnEnabled && worldTime >= entry.getValue()) {
                 wolf.discard();
                 iterator.remove();
                 continue;

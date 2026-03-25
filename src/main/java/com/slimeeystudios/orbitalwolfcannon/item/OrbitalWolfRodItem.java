@@ -1,5 +1,6 @@
 package com.slimeeystudios.orbitalwolfcannon.item;
 
+import com.slimeeystudios.orbitalwolfcannon.config.OrbitalWolfCannonConfig;
 import com.slimeeystudios.orbitalwolfcannon.entity.WolfStrikeManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -11,7 +12,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 public class OrbitalWolfRodItem extends Item {
-    public static final int COOLDOWN_TICKS = 20 * 60;
 
     public OrbitalWolfRodItem(Settings settings) {
         super(settings);
@@ -39,7 +39,8 @@ public class OrbitalWolfRodItem extends Item {
             return ActionResult.FAIL;
         }
 
-        serverPlayer.getItemCooldownManager().set(stack, COOLDOWN_TICKS);
+        int cooldownTicks = OrbitalWolfCannonConfig.cooldownSeconds * 20;
+        serverPlayer.getItemCooldownManager().set(stack, cooldownTicks);
         WolfStrikeManager.executeStrike(serverPlayer);
 
         return ActionResult.SUCCESS;

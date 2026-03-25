@@ -1,5 +1,6 @@
 package com.slimeeystudios.orbitalwolfcannon;
 
+import com.slimeeystudios.orbitalwolfcannon.config.OrbitalWolfCannonConfig;
 import com.slimeeystudios.orbitalwolfcannon.entity.WolfStrikeManager;
 import com.slimeeystudios.orbitalwolfcannon.recipe.RecipeBookUnlocker;
 import com.slimeeystudios.orbitalwolfcannon.registry.ModItems;
@@ -15,6 +16,7 @@ public class OrbitalWolfCannonMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        OrbitalWolfCannonConfig.load();
         ModItems.register();
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(ModItems.ORBITAL_WOLF_ROD));
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SEARCH).register(entries -> entries.add(ModItems.ORBITAL_WOLF_ROD));
