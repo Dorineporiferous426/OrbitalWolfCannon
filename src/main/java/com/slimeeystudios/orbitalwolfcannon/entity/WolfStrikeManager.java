@@ -3,6 +3,7 @@ package com.slimeeystudios.orbitalwolfcannon.entity;
 import com.slimeeystudios.orbitalwolfcannon.OrbitalWolfCannonMod;
 import com.slimeeystudios.orbitalwolfcannon.config.OrbitalWolfCannonConfig;
 import com.slimeeystudios.orbitalwolfcannon.util.CirclePositionUtil;
+import com.slimeeystudios.orbitalwolfcannon.util.WolfDyeColorUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.Entity;
@@ -62,12 +63,13 @@ public final class WolfStrikeManager {
                 OrbitalWolfCannonConfig.wolfCount
         );
 
-        for (double[] position : positions) {
-            summonSingleWolf(world, player, position[0], player.getY(), position[1]);
+        for (int i = 0; i < positions.size(); i++) {
+            double[] position = positions.get(i);
+            summonSingleWolf(world, player, position[0], player.getY(), position[1], i);
         }
     }
 
-    private static void summonSingleWolf(ServerWorld world, ServerPlayerEntity owner, double x, double y, double z) {
+    private static void summonSingleWolf(ServerWorld world, ServerPlayerEntity owner, double x, double y, double z, int wolfIndex) {
         WolfEntity wolf = EntityType.WOLF.create(world, SpawnReason.EVENT);
         if (wolf == null) {
             OrbitalWolfCannonMod.LOGGER.warn("Failed to create wolf entity during Orbital Wolf Rod activation.");
@@ -78,6 +80,19 @@ public final class WolfStrikeManager {
         wolf.setOwner(owner);
         wolf.setTamed(true, true);
         wolf.setSitting(false);
+        
+        // Set wolf collar color based on index (cycles through 16 dye colors)
+        net.minecraft.util.DyeColor collarColor = WolfDyeColorUtil.getColorForWolf(wolfIndex);
+        try {
+            // Attempt to set collar color via reflection if direct method not available
+            java.lang.reflect.Method method = WolfEntity.class.getDeclaredMethod("setCollarColor", net.minecraft.util.DyeColor.class);
+            method.setAccessible(true);
+            method.invoke(wolf, collarColor);
+        } catch (Exception e) {
+            // Fallback: just log if method doesn't exist, don't crash
+            OrbitalWolfCannonMod.LOGGER.debug("Could not set wolf collar color: {}", e.getMessage());
+        }
+        
         wolf.equipStack(EquipmentSlot.BODY, new ItemStack(Items.WOLF_ARMOR));
         wolf.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, OrbitalWolfCannonConfig.strengthDurationTicks, OrbitalWolfCannonConfig.strengthAmplifier));
 
