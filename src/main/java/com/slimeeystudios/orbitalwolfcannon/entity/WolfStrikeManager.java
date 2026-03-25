@@ -153,6 +153,11 @@ public final class WolfStrikeManager {
                 continue;
             }
 
+            // Keep wolves standing (prevent sitting)
+            if (wolf.isSitting()) {
+                wolf.setSitting(false);
+            }
+
             if (worldTime % 20L == 0L && (wolf.getTarget() == null || !wolf.getTarget().isAlive())) {
                 retargetToNearbyHostile(wolf);
             }
