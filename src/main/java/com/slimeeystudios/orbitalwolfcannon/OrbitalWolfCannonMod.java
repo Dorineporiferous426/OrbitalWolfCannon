@@ -1,0 +1,20 @@
+package com.slimeeystudios.orbitalwolfcannon;
+
+import com.slimeeystudios.orbitalwolfcannon.entity.WolfStrikeManager;
+import com.slimeeystudios.orbitalwolfcannon.registry.ModItems;
+import net.fabricmc.api.ModInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class OrbitalWolfCannonMod implements ModInitializer {
+    public static final String MOD_ID = "orbital_wolf_cannon";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    @Override
+    public void onInitialize() {
+        ModItems.register();
+        WolfStrikeManager.registerTickHandler();
+        LOGGER.info("Orbital Wolf Cannon initialized");
+    }
+}
+
