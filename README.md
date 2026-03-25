@@ -11,13 +11,14 @@ A Minecraft Fabric mod that adds the **Orbital Wolf Rod**. Using the rod summons
 - Nearby hostile mobs are auto-targeted
 - Activation particle ring + spawn bursts + powerful summon sound
 - 60-second item cooldown with action bar warning when unavailable
-- Optional auto-despawn after 60 seconds
-- Tooltip and crafting recipe included
+- Summoned wolves auto-despawn after 5 minutes
+- Tooltip, recipe book unlock, and crafting recipe included
+- Rod appears in creative inventory search and shows enchanted glint
 
 ## Requirements
 
 - Java 21
-- Minecraft 1.21.1 (closest stable target to requested 1.21.11)
+- Minecraft 1.21.11
 - Fabric Loader + Fabric API
 
 ## Quick Start
@@ -31,6 +32,13 @@ Then give yourself the rod:
 
 ```mcfunction
 give @p orbital_wolf_cannon:orbital_wolf_rod
+```
+
+Recipe/advancement verification commands:
+
+```mcfunction
+/recipe give @p orbital_wolf_cannon:orbital_wolf_rod
+/advancement grant @p only orbital_wolf_cannon:orbital_dog
 ```
 
 ## Test Harness

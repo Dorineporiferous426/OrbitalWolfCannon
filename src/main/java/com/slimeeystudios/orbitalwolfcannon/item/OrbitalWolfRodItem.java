@@ -6,8 +6,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 public class OrbitalWolfRodItem extends Item {
@@ -18,25 +18,30 @@ public class OrbitalWolfRodItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public boolean hasGlint(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
         if (world.isClient()) {
-            return TypedActionResult.success(stack);
+            return ActionResult.SUCCESS;
         }
 
         if (!(user instanceof ServerPlayerEntity serverPlayer)) {
-            return TypedActionResult.fail(stack);
+            return ActionResult.FAIL;
         }
 
-        if (serverPlayer.getItemCooldownManager().isCoolingDown(this)) {
+        if (serverPlayer.getItemCooldownManager().isCoolingDown(stack)) {
             serverPlayer.sendMessage(Text.translatable("item.orbital_wolf_cannon.orbital_wolf_rod.cooldown"), true);
-            return TypedActionResult.fail(stack);
+            return ActionResult.FAIL;
         }
 
-        serverPlayer.getItemCooldownManager().set(this, COOLDOWN_TICKS);
+        serverPlayer.getItemCooldownManager().set(stack, COOLDOWN_TICKS);
         WolfStrikeManager.executeStrike(serverPlayer);
 
-        return TypedActionResult.success(stack);
+        return ActionResult.SUCCESS;
     }
 }

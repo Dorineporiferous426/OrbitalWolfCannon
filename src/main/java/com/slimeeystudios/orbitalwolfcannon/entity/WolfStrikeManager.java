@@ -7,6 +7,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
@@ -33,9 +34,9 @@ public final class WolfStrikeManager {
     private static final int STRENGTH_DURATION_TICKS = 6_000;
     private static final int STRENGTH_AMPLIFIER = 1;
 
-    // Optional feature toggle: summoned wolves despawn after this duration.
+    // Summoned wolves despawn after 5 minutes.
     private static final boolean AUTO_DESPAWN_ENABLED = true;
-    private static final long AUTO_DESPAWN_TICKS = 20L * 60L;
+    private static final long AUTO_DESPAWN_TICKS = 20L * 60L * 5L;
 
     private static final Map<UUID, Long> TRACKED_WOLVES = new HashMap<>();
 
@@ -47,7 +48,7 @@ public final class WolfStrikeManager {
     }
 
     public static void executeStrike(ServerPlayerEntity player) {
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = (ServerWorld) player.getEntityWorld();
 
         spawnActivationRing(world, player);
         world.playSound(
@@ -74,14 +75,14 @@ public final class WolfStrikeManager {
     }
 
     private static void summonSingleWolf(ServerWorld world, ServerPlayerEntity owner, double x, double y, double z) {
-        WolfEntity wolf = EntityType.WOLF.create(world);
+        WolfEntity wolf = EntityType.WOLF.create(world, SpawnReason.EVENT);
         if (wolf == null) {
             OrbitalWolfCannonMod.LOGGER.warn("Failed to create wolf entity during Orbital Wolf Rod activation.");
             return;
         }
 
         wolf.refreshPositionAndAngles(x, y, z, owner.getYaw(), 0.0F);
-        wolf.setOwnerUuid(owner.getUuid());
+        wolf.setOwner(owner);
         wolf.setTamed(true, true);
         wolf.setSitting(false);
         wolf.equipStack(EquipmentSlot.BODY, new ItemStack(Items.WOLF_ARMOR));
@@ -109,7 +110,7 @@ public final class WolfStrikeManager {
 
     private static void retargetToNearbyHostile(WolfEntity wolf) {
         Box scanBox = wolf.getBoundingBox().expand(16.0D);
-        List<HostileEntity> hostiles = wolf.getWorld().getEntitiesByClass(HostileEntity.class, scanBox, LivingEntity::isAlive);
+        List<HostileEntity> hostiles = wolf.getEntityWorld().getEntitiesByClass(HostileEntity.class, scanBox, LivingEntity::isAlive);
         if (!hostiles.isEmpty()) {
             wolf.setTarget(hostiles.get(0));
         }
